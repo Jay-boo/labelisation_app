@@ -11,3 +11,4 @@ colored = "2.0"
 serde_json = "1.0.99"
 serde = { version = "1.0", features = ["derive"] }
 chrono="0.4"
+ctrlc = "3.1.5"
