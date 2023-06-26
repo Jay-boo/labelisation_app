@@ -2,7 +2,7 @@ use labelisation::csv_row_processor;
 
 #[cfg(test)]
 mod tests {
-    use labelisation::csv_row_processor;
+    use labelisation::csv_row_processor::{self, Row};
 
     #[test]
     fn split_string_on_patterns_test() {
@@ -39,7 +39,25 @@ mod tests {
     #[test]
     fn detect_warning_test(){
         println!(r"  DETECT WARNING TEST /!\ ");
-        let processor=csv_row_processor::CsvRowProcessor::new(
+
+        let row1:Row=Row{
+            announcement_id:String::from("slg_182207265"),
+            type_source:String::from("sales"),
+            estate_type:String::from("Appartement"),
+            price: 314500.0,
+            price_m2: 14473.0,
+            area:21.73,
+            room_count:2,
+            meuble:false,
+            postal_code:String::from("75020"),
+            data_source:String::from("seloger"),
+            type_owner:1,
+            ..Default::default()
+            
+
+
+        };
+        let mut processor=csv_row_processor::CsvRowProcessor::new(
             csv_row_processor::Row{
                 area:40.0,
                 ..Default::default()
@@ -47,6 +65,8 @@ mod tests {
 
         );
         processor.detect_warnings();
+        println!("Warning score : {}",processor.warn_score);
+
 
     }
 }

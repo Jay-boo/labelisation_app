@@ -90,7 +90,6 @@ fn main() {
         // 1---------------------------
         //  Detect anomaly
 
-        let collected_date_str = record.get(13).unwrap(); // Assuming collected_date is at index 12
         let collected_date = match NaiveDate::parse_from_str(collected_date_str, "%Y-%m-%d") {
             Ok(date) => date,
             Err(err) => {

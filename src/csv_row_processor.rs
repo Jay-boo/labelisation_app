@@ -31,7 +31,7 @@ pub struct Row{
 pub struct CsvRowProcessor {
     row: Row,
     rules:JsonRule,
-    warn_score: i32,
+    pub warn_score: i32,
     pre_response :Row
     
 }
@@ -39,8 +39,8 @@ pub struct CsvRowProcessor {
 
 #[derive(serde::Serialize,serde::Deserialize)]
 struct JsonRule{
-    global_rules:Vec<HashMap<String,String>>,
-    conditional_rules:Vec<HashMap<String,String>>
+    pub global_rules:Vec<HashMap<String,String>>,
+    pub conditional_rules:Vec<HashMap<String,String>>
 } 
 
 
@@ -97,7 +97,7 @@ struct JsonRule{
         }
     }
 
-    pub fn  detect_warnings(self){
+    pub fn  detect_warnings( &mut self){
         
         println!("----Parsing Global rules----");
         for global_rule in self.rules.global_rules.iter(){
@@ -130,8 +130,9 @@ struct JsonRule{
                 _=> panic!("unknown {}",global_rule["var"])
 
             };
+            if _sucess{self.warn_score+=3;}
 
-        println!("----Parsing Global rules----");
+        println!("----Parsing conditional rules----");
         for conditional_rule in self.rules.conditional_rules.iter(){
 
 
@@ -191,19 +192,13 @@ struct JsonRule{
 
                 };
             if !_filtered{continue;}
-
-            
-
-
             let input_string:&String=&conditional_rule["then"];
             let _condition=split_string_on_patterns(
                 input_string.to_string(),
                 [String::from(">"),String::from("<"),String::from(">="),String::from("<="),String::from("==")].to_vec(),
                 false
             );
-
             let _col= self.get_field_value(_condition.get(2).unwrap());
-
             let _sucess: bool =match _condition.get(1).unwrap().as_str(){
                 "area"=>match _condition.get(0).unwrap().as_str(){
                     ">"=> _col.unwrap().parse::<f32>().unwrap() > _condition.get(2).unwrap().parse::<f32>().unwrap(),
@@ -226,6 +221,7 @@ struct JsonRule{
 
             };
 
+            if _sucess{self.warn_score+=3;}
 
                 
                 
@@ -266,6 +262,13 @@ struct JsonRule{
         }
 
     }
+    pub fn next_row(&mut self,next_row:Row){
+        self.row=next_row;
+        self.warn_score=0;
+        self.pre_response=Row{
+            ..Default::default()
+        };
+    }
 
 
 
@@ -284,7 +287,7 @@ pub fn split_string_on_patterns(input_string: String, patterns: Vec<String>,_glo
             break;
         }
     }
-    println!("{:?}", res);
+    // println!("{:?}", res);
     res
 }
 // use regex::Regex;
