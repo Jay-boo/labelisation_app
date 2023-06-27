@@ -130,7 +130,7 @@ struct JsonRule{
                 _=> panic!("unknown {}",global_rule["var"])
 
             };
-            if _sucess{
+            if !_sucess{
                 self.warn_score+=3;
                 println!("Global Anomaly : {}{} ",global_rule["var"],input_string);
             }
@@ -230,7 +230,7 @@ struct JsonRule{
 
             };
 
-            if _sucess{
+            if !_sucess{
                     self.warn_score+=3;
                     println!("Anomaly detected on {}|{}",input_string,conditional_rule["condition"]);
                 }
@@ -247,9 +247,6 @@ struct JsonRule{
 
     }
     
-    fn detect_known_expression(self) {
-        
-    }
 
 
     fn get_field_value(&self,field_name:&str) -> Option<String>{
@@ -283,6 +280,10 @@ struct JsonRule{
     }
 
 
+    fn detect_known_expression(self) {
+        let _desc:String =self.row.description.to_lowercase();
+        
+    }
 
 }
 
