@@ -52,37 +52,94 @@ fn main() {
             process::exit(1);
         }
     };
-    let output_path = format!("src/.data/new_df_usable_profiteroles.csv");
-    let file = match std::fs::File::create(&output_path) {
-        Ok(file) => file,
+
+    //------------------------------
+    //Restrict iterator watching already done labelized rows
+
+    let mut output_file_content = match csv::Reader::from_path("src/.data/new_df_usable_profiteroles.csv"){
+        Ok( mut output_file_content) => {
+            output_file_content
+        },
         Err(err) => {
-            eprintln!("Failed to create output file: {}", err);
-            process::exit(1);
+            eprintln!("Reader doesn't find output file :{}",err);
+            let file=match std::fs::File::create("src/.data/new_df_usable_profiteroles.csv") {
+                Ok(file) => {
+                    eprintln!("New file created");
+                    file
+                },
+                Err(err) => {
+                    eprintln!("Can't create file");
+                    process::exit(1);
+                }
+            };
+            csv::Reader::from_path("src/.data/new_df_usable_profiteroles.csv").unwrap()
+
         }
     };
+    let size_registered_data=output_file_content.records().count();
+    println!("Actual columns registered : {}",size_registered_data);
+
+    //---------------------------------------
+    //Open output file 
+
+    let output_path = format!("src/.data/new_df_usable_profiteroles.csv");
+    // let file = match std::fs::File::create(&output_path) {
+    //     Ok(file) => file,
+    //     Err(err) => {
+    //         eprintln!("Failed to create output file: {}", err);
+    //         process::exit(1);
+    //     }
+    // };
+
+
+    let file = match std::fs::OpenOptions::new().write(true).append(true).create_new(true).open(&output_path) {
+        Ok(file) => file,
+        Err(err) => match err.kind() {
+            std::io::ErrorKind::AlreadyExists => {
+                match std::fs::OpenOptions::new().write(true).append(true).open(&output_path) {
+                    Ok(file) => {
+                        eprintln!(" Open existing file finally {}",output_path);
+                        file
+                    },
+                    Err(err) => {
+                        eprintln!("Failed to open existing file: {}", err);
+                        process::exit(1);
+                    }
+                }
+            }
+            _ => {
+                eprintln!("Failed to create or open file: {}", err);
+                process::exit(1);
+            }
+        },
+    };
+
+
+
+
+
+
+    
+
+    //------------------------
+    // Writer
     let mut wrt=csv::Writer::from_writer(file);
     let mut rows: Vec<CsvRow>=Vec::new();
-    let headers = match reader.headers(){
-        Ok(headers) => headers,
-        Err(err) => {
-            eprintln!("Failed to create output file: {}", err);
-            process::exit(1);
-        }
-    };
-    let mut final_headers=headers.clone();
-    final_headers.push_field("target");
-    wrt.write_record(&final_headers);
-    
+    if size_registered_data==0{
+        let headers = match reader.headers(){
+            Ok(headers) => headers,
+            Err(err) => {
+                eprintln!("Failed to find headers in file: {}", err);
+                process::exit(1);
+            }
+        };
+        let mut final_headers=headers.clone();
+        final_headers.push_field("target");
+        wrt.write_record(&final_headers);
+    }
 
-
-
-
-    
-
-
-
-
-    for res in reader.records().take(5){
+    let _iterator= reader.records().skip(size_registered_data);
+    for res in _iterator.take(5){
         let record = match res {
             Ok(record) => record,
             Err(err) => {
@@ -167,6 +224,7 @@ fn main() {
 
 
     }
+    println!("Out of for loop")
     // if !running.load(Ordering::SeqCst){
     //     println!("exit process");
     //     break;
