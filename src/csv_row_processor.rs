@@ -99,7 +99,7 @@ struct JsonRule{
 
     pub fn  detect_warnings( &mut self){
         
-        println!("----Parsing Global rules----");
+        // println!("----Parsing Global rules----");
         for global_rule in self.rules.global_rules.iter(){
             let _col= self.get_field_value(&global_rule["var"]).unwrap();
             let input_string:&String=&global_rule["then"];
@@ -108,7 +108,7 @@ struct JsonRule{
                 [String::from(">"),String::from("<"),String::from(">="),String::from("<="),String::from("==")].to_vec(),
                 true
             );
-            println!("col value: {}",_col);
+            // println!("col value: {}",_col);
             let _sucess: bool =match global_rule["var"].as_str(){
                 "area"=>match _condition.get(0).unwrap().as_str(){
                     ">"=> _col.parse::<f32>().unwrap() > _condition.get(2).unwrap().parse::<f32>().unwrap(),
@@ -130,9 +130,12 @@ struct JsonRule{
                 _=> panic!("unknown {}",global_rule["var"])
 
             };
-            if _sucess{self.warn_score+=3;}
+            if _sucess{
+                self.warn_score+=3;
+                println!("Global Anomaly : {}{} ",global_rule["var"],input_string);
+            }
 
-        println!("----Parsing conditional rules----");
+        // println!("----Parsing conditional rules----");
         for conditional_rule in self.rules.conditional_rules.iter(){
 
 
@@ -195,10 +198,10 @@ struct JsonRule{
             let input_string:&String=&conditional_rule["then"];
             let _condition=split_string_on_patterns(
                 input_string.to_string(),
-                [String::from(">"),String::from("<"),String::from(">="),String::from("<="),String::from("==")].to_vec(),
+                [String::from(">"),String::from("<"),String::from(">="),String::from("<="),String::from("=="),String::from("!=")].to_vec(),
                 false
             );
-            let _col= self.get_field_value(_condition.get(2).unwrap());
+            let _col= self.get_field_value(_condition.get(1).unwrap());
             let _sucess: bool =match _condition.get(1).unwrap().as_str(){
                 "area"=>match _condition.get(0).unwrap().as_str(){
                     ">"=> _col.unwrap().parse::<f32>().unwrap() > _condition.get(2).unwrap().parse::<f32>().unwrap(),
@@ -215,13 +218,22 @@ struct JsonRule{
                     ">"=> _col.unwrap().parse::<f32>().unwrap() > _condition.get(2).unwrap().parse::<f32>().unwrap(),
                     "<"=> _col.unwrap().parse::<f32>().unwrap() < _condition.get(2).unwrap().parse::<f32>().unwrap(),
                     _=> panic!("The code panic becaused of _col value  :{}",_col.unwrap().to_string())
-                }
+                },
+                "estate_type"=> match _condition.get(0).unwrap().as_str(){
+                        "=="=> _col.unwrap().to_string()==_condition.get(2).unwrap().to_string(),
+                        "!="=> _col.unwrap().to_string()!=_condition.get(2).unwrap().to_string(),
+                        _=> panic!("Unknowned signed for written conditional rule :{}",input_string)
+                    }
+
 
                 _=> panic!("unknown {}",global_rule["var"])
 
             };
 
-            if _sucess{self.warn_score+=3;}
+            if _sucess{
+                    self.warn_score+=3;
+                    println!("Anomaly detected on {}|{}",input_string,conditional_rule["condition"]);
+                }
 
                 
                 

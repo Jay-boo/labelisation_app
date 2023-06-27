@@ -138,8 +138,23 @@ fn main() {
         wrt.write_record(&final_headers);
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    let mut processor=csv_row_processor::CsvRowProcessor::new(csv_row_processor::Row{..Default::default()});
     let _iterator= reader.records().skip(size_registered_data);
-    for res in _iterator.take(5){
+    for res in _iterator{
         let record = match res {
             Ok(record) => record,
             Err(err) => {
@@ -147,18 +162,6 @@ fn main() {
                 process::exit(1);
             }
         };
-        let third_element=&record.get(0).unwrap_or("");
-        println!("Third element: {}", third_element.on_yellow());
-
-        let third_element=&record.get(1).unwrap_or("");
-        println!("Third element: {}", third_element.on_yellow());
-
-        let third_element=&record.get(2).unwrap_or("");
-        println!("Third element: {}", third_element.on_yellow());
-        let third_element=&record.get(7).unwrap_or("");
-        println!("Third element: {}", third_element.on_yellow());
-        // 1---------------------------
-        //  Detect anomaly
 
         let collected_date = match NaiveDate::parse_from_str(record.get(13).unwrap(), "%Y-%m-%d") {
             Ok(date) => date,
@@ -168,7 +171,7 @@ fn main() {
             }
         };
 
-        let processor:csv_row_processor::CsvRowProcessor= csv_row_processor::CsvRowProcessor::new(
+        processor.next_row(
             csv_row_processor::Row{
                 announcement_id: record.get(1).unwrap().to_string(),
                 type_source: record.get(2).unwrap().to_string(),
@@ -192,6 +195,16 @@ fn main() {
             }
         );
 
+        // 1---------------------------
+        //  Detect anomaly
+        println!("record: ");
+        for field in record.iter() {
+            println!("{}", field);
+        }
+        processor.detect_warnings();
+        println!(" Anomaly count {}",processor.warn_score);
+        
+
 
         // 2------------------------
         // Use regex
@@ -203,7 +216,7 @@ fn main() {
 
         // println!(" Original col :\n {:?}", record);
         let mut new_col = String::new();
-        println!("Enter the label value for row " );
+        println!("Enter the label value for row :" );
         io::stdin()
             .read_line(&mut new_col)
             .expect("Failed to read input");
@@ -224,33 +237,6 @@ fn main() {
 
 
     }
-    println!("Out of for loop")
-    // if !running.load(Ordering::SeqCst){
-    //     println!("exit process");
-    //     break;
-    //     
-    // }
-
-    //------------------------------------
-    // Write outputs
-
-    
-    // for row in rows{
-    //     let mut record=row.row.clone();
-    //     record.push_field(&row.label);
-    //     let res=match wrt.write_record(&record) {
-    //         Ok(res)=> res,
-    //         Err(err) => {
-    //             eprintln!("Failed to create output file: {}", err);
-    //             process::exit(1);
-    //         }
-    //     };
-    //
-    // }
-
-
-
-    
     
 }
 
