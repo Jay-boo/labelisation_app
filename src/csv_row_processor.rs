@@ -2,6 +2,12 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use serde_json::{from_str,Value, to_string};
 use chrono::NaiveDate;
+use crate::regex_sets;
+use std::any::Any;
+
+use std::iter::zip;
+use colored::*;
+use regex::{RegexSet,Regex};
 
 
 
@@ -12,12 +18,12 @@ use chrono::NaiveDate;
 pub struct Row{
     pub announcement_id: String,
     pub type_source: String,
-    pub estate_type: String,
-    pub price : f32,
+    pub estate_type: String, //REG
+    pub price : f32,//REG
     pub price_m2 : f32,
-    pub area:f32,
-    pub room_count:i32,
-    pub meuble:bool,
+    pub area:f32,//REG
+    pub room_count:i32, //REG
+    pub meuble:bool, //REG
     pub postal_code:String,
     pub lat:String,
     pub lon:String,
@@ -28,11 +34,13 @@ pub struct Row{
 
 }
 
+
+
+
 pub struct CsvRowProcessor {
     row: Row,
     rules:JsonRule,
     pub warn_score: i32,
-    pre_response :Row
     
 }
 
@@ -90,10 +98,7 @@ struct JsonRule{
         CsvRowProcessor {
             row: row,
             rules:rules,
-            warn_score: 0,
-            pre_response: Row{
-                ..Default::default()
-            }
+            warn_score: 0
         }
     }
 
@@ -274,14 +279,28 @@ struct JsonRule{
     pub fn next_row(&mut self,next_row:Row){
         self.row=next_row;
         self.warn_score=0;
-        self.pre_response=Row{
-            ..Default::default()
-        };
     }
 
 
-    fn detect_known_expression(self) {
-        let _desc:String =self.row.description.to_lowercase();
+    pub fn detect_known_expression(self) -> String {
+        let desc:String =self.row.description.to_lowercase();
+        let all_sets:Vec<&RegexSet>=vec![&regex_sets::PRICE_SET,&regex_sets::ESTATE_TYPE_SET,&regex_sets::AREA_SET,&regex_sets::ROOM_COUNT_SET,&regex_sets::MEUBLE_SET];
+        let colors:Vec<Color>=vec![Color::Green,Color::Red,Color::Yellow,Color::Blue,Color::TrueColor { r:160 , g: 32, b: 240 }];
+        let mut modified_desc=desc.clone();
+
+        for (set,color) in zip(all_sets.iter(),colors.iter()){
+            for pattern in set.patterns(){
+                for mat in regex::Regex::new(pattern).unwrap().find_iter(&desc){
+                    let matched_str=&desc[mat.start()..mat.end()];
+                    modified_desc=modified_desc.replace(
+                        matched_str,
+                        &matched_str.color(*color).bold().to_string());
+
+                }
+            }
+
+        }
+        modified_desc
         
     }
 

@@ -1,7 +1,9 @@
 pub mod csv_row_processor;
+use colored::*;
 pub mod regex_sets;
 use ctrlc;
 extern crate csv;
+use std::iter::zip;
 use std::io;
 use std::process;
 use std::str::FromStr;
@@ -153,9 +155,11 @@ fn main() {
 
 
 
-    let mut processor=csv_row_processor::CsvRowProcessor::new(csv_row_processor::Row{..Default::default()});
     let _iterator= reader.records().skip(size_registered_data);
     for res in _iterator{
+        println!("--------------------------------");
+        let mut processor=csv_row_processor::CsvRowProcessor::new(csv_row_processor::Row{..Default::default()});
+        
         let record = match res {
             Ok(record) => record,
             Err(err) => {
@@ -198,17 +202,34 @@ fn main() {
 
         // 1---------------------------
         //  Detect anomaly
-        println!("record: ");
-        for field in record.iter() {
-            println!("{}", field);
+        println!("Row : ");
+        for (field,field_name) in zip(record.iter().skip(1),vec!["announcement_id","type_source","estate_type","price","price_m2","area","room_count","meuble","postal_code","lat","lon","description","collected_date","data_source","type_owner"]) {
+            let mut field_str=String::from(field);
+            if field_name=="description"{continue;}
+            if field_name=="price"{
+                field_str=field_str.color(Color::Green).to_string();
+            }else if field_name=="estate_type"{
+                field_str=field_str.color(Color::Red).to_string();
+            }else if field_name=="area" {
+                 field_str =field_str.color(Color::Blue).to_string();
+            }else if field_name=="room_count"{
+                 field_str =field_str.color(Color::Yellow).to_string();
+            }else if field_name=="meuble"{
+                 field_str =field_str.color(Color::TrueColor { r: 160, g: 32, b: 240 }).to_string();
+
+            }
+            println!("{}:{}:",field_name, field_str);
         }
+        println!("-----");
         processor.detect_warnings();
         println!(" Anomaly count {}",processor.warn_score);
+        println!("-----");
         
 
 
         // 2------------------------
         // Use regex
+        println!("{}",processor.detect_known_expression());
 
 
 
@@ -217,6 +238,7 @@ fn main() {
 
         // println!(" Original col :\n {:?}", record);
         let mut new_col = String::new();
+        println!("-----");
         println!("Enter the label value for row :" );
         io::stdin()
             .read_line(&mut new_col)
@@ -228,8 +250,6 @@ fn main() {
 
         rows.push(csv_row);
         write_record(&mut wrt, &last_row,_new_col_clone);
-        println!("WRITTEN");
-        println!("LINE COUNTER: --- ");
         if !running.load(Ordering::SeqCst){
             println!("break");
             break;
