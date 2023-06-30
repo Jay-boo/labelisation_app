@@ -75,7 +75,7 @@ struct JsonRule{
                     {"condition": "room_count==1", "then": "area<50"},
                     {"condition": "type_owner==1", "then": "area<90"},
                     {"condition": "type_source==rentals", "then": "area<70"},
-                    {"condition": "type_owner==sales", "then": "area>15"},
+                    {"condition": "type_source==sales", "then": "area>15"},
                     {"condition": "estate_type==Parking", "then": "meuble==false"},
                     {"condition": "price>300000", "then": "area>20"},
                     {"condition": "estate_type==Parking", "then": "price<100000"},
@@ -103,8 +103,8 @@ struct JsonRule{
     }
 
     pub fn  detect_warnings( &mut self){
+
         
-        // println!("----Parsing Global rules----");
         for global_rule in self.rules.global_rules.iter(){
             let _col= self.get_field_value(&global_rule["var"]).unwrap();
             let input_string:&String=&global_rule["then"];
@@ -139,8 +139,12 @@ struct JsonRule{
                 self.warn_score+=3;
                 println!("Global Anomaly : {}{} ",global_rule["var"],input_string);
             }
+        }
 
-        // println!("----Parsing conditional rules----");
+
+        for conditional_rule in self.rules.conditional_rules.iter(){
+        }
+
         for conditional_rule in self.rules.conditional_rules.iter(){
 
 
@@ -228,29 +232,43 @@ struct JsonRule{
                         "=="=> _col.unwrap().to_string()==_condition.get(2).unwrap().to_string(),
                         "!="=> _col.unwrap().to_string()!=_condition.get(2).unwrap().to_string(),
                         _=> panic!("Unknowned signed for written conditional rule :{}",input_string)
+                    },
+                "type_source"=>match _condition.get(0).unwrap().as_str(){
+                        "=="=> _col.unwrap().to_string()==_condition.get(2).unwrap().to_string(),
+                        "!="=> _col.unwrap().to_string()!=_condition.get(2).unwrap().to_string(),
+                        _=> panic!("Unknowned signed for written conditional rule :{}",input_string)
+                    }
+                "type_owner"=>match _condition.get(0).unwrap().as_str(){
+                        "=="=> _col.unwrap().to_string()==_condition.get(2).unwrap().to_string(),
+                        "!="=> _col.unwrap().to_string()!=_condition.get(2).unwrap().to_string(),
+                        _=> panic!("Unknowned signed for written conditional rule :{}",input_string)
+                    }
+                "meuble"=>match _condition.get(0).unwrap().as_str(){
+                        "=="=> _col.unwrap().to_string()==_condition.get(2).unwrap().to_string(),
+                        "!="=> _col.unwrap().to_string()!=_condition.get(2).unwrap().to_string(),
+                        _=> panic!("Unknowned signed for written conditional rule :{}",input_string)
                     }
 
 
-                _=> panic!("unknown {}",global_rule["var"])
+                _=> panic!("unknown {}",_condition.get(1).unwrap())
 
             };
 
             if !_sucess{
-                    self.warn_score+=3;
+                    self.warn_score+=1;
                     println!("Anomaly detected on {}|{}",input_string,conditional_rule["condition"]);
                 }
 
                 
                 
 
-            };
+        };
 
 
-        } 
+    } 
         
 
 
-    }
     
 
 
