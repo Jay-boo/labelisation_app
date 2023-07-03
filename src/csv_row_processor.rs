@@ -38,7 +38,7 @@ pub struct Row{
 
 
 pub struct CsvRowProcessor {
-    row: Row,
+    pub row: Row,
     rules:JsonRule,
     pub warn_score: i32,
     

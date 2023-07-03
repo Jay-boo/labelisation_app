@@ -17,6 +17,8 @@ lazy_static! {
         RegexSet::new(&[
             r"(\d[\d\s]*\d)\s*€",
             r"\bprice\b",
+            r"\beuro\b",
+            r"\beuros\b",
         ])
         .unwrap();
 
@@ -26,7 +28,7 @@ lazy_static! {
     
     pub static ref ROOM_COUNT_SET: RegexSet = RegexSet::new([
         r"(\d+)\s*(?:pièces?|piece)",
-        r"\bT\d+\b"
+        r"\bt\d+\b"
     ]).unwrap();
 
     pub static ref MEUBLE_SET: RegexSet = RegexSet::new([

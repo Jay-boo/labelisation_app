@@ -52,7 +52,7 @@ fn main() {
     } ).expect("Error setting ctrl c handler");
     //-----------------------------------
     // Load table
-    let csv_path="src/.data/processed_df_labelisation.csv";
+    let csv_path="src/.data/to_label_part2_bis.csv";
     let mut reader = match csv::Reader::from_path(csv_path){
         Ok(reader) => reader,
         Err(err) => {
@@ -208,8 +208,8 @@ fn main() {
                 type_source: record.get(2).unwrap().to_string(),
                 estate_type: record.get(3).unwrap().to_string(),
                 price : record.get(4).unwrap().parse::<f32>().unwrap(),
-                price_m2 : record.get(5).unwrap().parse::<f32>().unwrap(),
-                area:record.get(6).unwrap().parse::<f32>().unwrap(),
+                price_m2 : record.get(6).unwrap().parse::<f32>().unwrap(),
+                area:record.get(5).unwrap().parse::<f32>().unwrap(),
                 room_count:record.get(7).unwrap().parse::<f32>().unwrap() as i32,
                 meuble:match record.get(8).unwrap(){
                     "True"=>true,
@@ -231,7 +231,7 @@ fn main() {
             // 1---------------------------
             //  Detect anomaly
             println!("Row : ");
-            for (field,field_name) in zip(record.iter().skip(1),vec!["announcement_id","type_source","estate_type","price","price_m2","area","room_count","meuble","postal_code","lat","lon","description","collected_date","data_source","type_owner"]) {
+            for (field,field_name) in zip(record.iter().skip(1),vec!["announcement_id","type_source","estate_type","price","area","price_m2","room_count","meuble","postal_code","lat","lon","description","collected_date","data_source","type_owner"]) {
                 let mut field_str=String::from(field);
                 if field_name=="description"{continue;}
                 if field_name=="price"{
