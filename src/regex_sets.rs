@@ -10,6 +10,7 @@ lazy_static! {
         r"\bmaison\b",
         r"\w*ex\b",
         r"\bstudio\b",
+        r"\bprojet\b"
     ])
     .unwrap();
     
@@ -28,11 +29,16 @@ lazy_static! {
     
     pub static ref ROOM_COUNT_SET: RegexSet = RegexSet::new([
         r"(\d+)\s*(?:pièces?|piece)",
-        r"\bt\d+\b"
+        r"(\d+)\s*(?:pièces?|piece)",
+        r"pi[è|e]ce[s]\b",
+        r"\bt\d+\b",
+        r"t[1-9]+bis",
+        r"\bf[1-9]\b"
     ]).unwrap();
 
     pub static ref MEUBLE_SET: RegexSet = RegexSet::new([
-        r"\bmeubl[é,e]\b"
+        r"\bmeubl[é,e]\b",
+        r"\bnu\b"
 
     ]).unwrap();
 
